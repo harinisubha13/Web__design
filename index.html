@@ -5,7 +5,6 @@
 <title>Eco-Dine SH</title><style>
 body {margin:0;font-family:sans-serif;background:#f4f6f5;}
 
-/* NAV */
 nav {
   background:#1b5e20;
   color:white;
@@ -16,13 +15,13 @@ nav {
 .logo {font-size:20px;font-weight:bold;}
 .sh {font-family:cursive;color:#ffd700;}
 
-/* MENU */
 .menu {
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:15px;
   padding:15px;
 }
+
 .card {
   background:white;
   border-radius:12px;
@@ -31,13 +30,16 @@ nav {
   transition:0.3s;
 }
 .card:hover {transform:scale(1.05);}
+
 .card img {
   width:100%;
   height:150px;
   object-fit:cover;
 }
+
 .card-body {padding:10px;}
 .price {color:#2e7d32;font-weight:bold;}
+
 button {
   width:100%;
   padding:8px;
@@ -51,13 +53,14 @@ button {
 /* CART */
 .cart {
   position:fixed;
-  right:-300px;
+  right:-320px;
   top:0;
-  width:280px;
+  width:300px;
   height:100%;
   background:white;
   padding:15px;
   transition:0.3s;
+  box-shadow:-3px 0 10px rgba(0,0,0,0.2);
 }
 .cart.open {right:0;}
 
@@ -79,20 +82,51 @@ button {
   50%{opacity:0}
   100%{opacity:1}
 }
+
+/* POPUP */
+.popup {
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+.popup-box {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:260px;
+  text-align:center;
+}
 </style></head><body><nav>
   <div class="logo">🌿 Eco-Dine <span class="sh">SH</span></div>
   <div onclick="toggleCart()">🛒 Cart (<span id="count">0</span>)</div>
-</nav><div class="menu" id="menu"></div><div class="cart" id="cart">
+</nav><div class="menu" id="menu"></div><!-- CART --><div class="cart" id="cart">
   <h3>Your Cart</h3>
-  <div id="cartItems"></div>
-  <h4>Total: ₹<span id="total">0</span></h4>
-</div><!-- 🧚 Fairy --><div class="fairy" id="fairy">🧚‍♀️✨</div><script>
+  <div id="cartItems"></div>  <hr>  <p>Subtotal: ₹<span id="subtotal">0</span></p>
+  <p>GST (5%): ₹<span id="gst">0</span></p>
+  <h4>Total: ₹<span id="total">0</span></h4>  <select id="payment">
+    <option>UPI</option>
+    <option>Card</option>
+    <option>Cash on Delivery</option>
+  </select><button onclick="openPopup()">Place Order</button>
+
+</div><!-- POPUP --><div class="popup" id="popup">
+  <div class="popup-box">
+    <h3>Confirm Order</h3>
+    <p>Total: ₹<span id="finalTotal"></span></p>
+    <p>Payment: <span id="finalPay"></span></p>
+    <button onclick="confirmOrder()">Confirm</button>
+    <button onclick="closePopup()">Cancel</button>
+  </div>
+</div><!-- FAIRY --><div class="fairy" id="fairy">🧚‍♀️✨</div><script>
 
 const menuItems = [
 {name:"Pizza",price:250,img:"https://images.unsplash.com/photo-1594007654729-407eedc4be65?auto=format&fit=crop&w=400"},
 {name:"Burger",price:180,img:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400"},
 {name:"Sandwich",price:120,img:"https://images.unsplash.com/photo-1567234669003-dce7a7a88821?auto=format&fit=crop&w=400"},
-{name:"Momos",price:110,img:"https://images.unsplash.com/photo-1625944525903-b0a9d0d9c9d6?auto=format&fit=crop&w=400"},
 {name:"Fried Rice",price:150,img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=400"},
 {name:"Donut",price:80,img:"https://images.unsplash.com/photo-1587735243615-c03f25aaff15?auto=format&fit=crop&w=400"},
 {name:"Pasta",price:200,img:"https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=400"},
@@ -113,10 +147,7 @@ function render(){
  menuItems.forEach((item,i)=>{
   html+=`
   <div class="card">
-    <img src="${item.img}" 
-         alt="${item.name}"
-         loading="lazy"
-         onerror="this.src='https://via.placeholder.com/400x300?text=Food'">
+    <img src="${item.img}">
     <div class="card-body">
       <h3>${item.name}</h3>
       <p class="price">₹${item.price}</p>
@@ -134,12 +165,17 @@ function add(i){
 }
 
 function updateCart(){
- let total=0,html="";
+ let subtotal=0,html="";
  for(let i in cart){
-  total+=menuItems[i].price*cart[i];
+  subtotal+=menuItems[i].price*cart[i];
   html+=`<p>${menuItems[i].name} x${cart[i]}</p>`;
  }
+ let gst=Math.round(subtotal*0.05);
+ let total=subtotal+gst;
+
  document.getElementById("cartItems").innerHTML=html;
+ document.getElementById("subtotal").innerText=subtotal;
+ document.getElementById("gst").innerText=gst;
  document.getElementById("total").innerText=total;
  document.getElementById("count").innerText=
  Object.values(cart).reduce((a,b)=>a+b,0);
@@ -153,6 +189,26 @@ function blinkFairy(){
  let fairy=document.getElementById("fairy");
  fairy.classList.add("blink");
  setTimeout(()=>fairy.classList.remove("blink"),500);
+}
+
+function openPopup(){
+ document.getElementById("popup").style.display="flex";
+ document.getElementById("finalTotal").innerText=
+ document.getElementById("total").innerText;
+ document.getElementById("finalPay").innerText=
+ document.getElementById("payment").value;
+}
+
+function closePopup(){
+ document.getElementById("popup").style.display="none";
+}
+
+function confirmOrder(){
+ alert("🎉 Order Placed Successfully!");
+ cart={};
+ updateCart();
+ closePopup();
+ toggleCart();
 }
 
 render();

@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eco-Dine Premium</title><style>
+<title>Eco-Dine SH</title><style>
 body {
   margin:0;
   font-family:'Segoe UI';
@@ -19,7 +19,18 @@ nav {
   align-items:center;
 }
 
-/* MENU GRID */
+.logo {
+  font-weight:bold;
+  font-size:20px;
+}
+
+.sh {
+  font-family:cursive;
+  font-size:18px;
+  color:#ffd700;
+}
+
+/* MENU */
 .menu {
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -27,7 +38,6 @@ nav {
   padding:20px;
 }
 
-/* CARD */
 .card {
   background:white;
   border-radius:15px;
@@ -35,9 +45,7 @@ nav {
   box-shadow:0 6px 15px rgba(0,0,0,0.1);
   transition:0.3s;
 }
-.card:hover {
-  transform:scale(1.05);
-}
+.card:hover { transform:scale(1.05); }
 
 .card img {
   width:100%;
@@ -45,14 +53,9 @@ nav {
   object-fit:cover;
 }
 
-.card-body {
-  padding:10px;
-}
+.card-body { padding:10px; }
 
-.price {
-  color:#2e7d32;
-  font-weight:bold;
-}
+.price { color:#2e7d32; font-weight:bold; }
 
 button {
   width:100%;
@@ -74,30 +77,50 @@ button {
   background:white;
   padding:15px;
   transition:0.3s;
-  box-shadow:-3px 0 10px rgba(0,0,0,0.2);
 }
 .cart.open { right:0; }
 
-/* PENGUIN */
-.penguin {
+/* 🧚 FAIRY */
+.fairy {
   position:fixed;
-  bottom:20px;
-  left:20px;
-  font-size:50px;
-  animation:float 3s infinite;
+  top:80px;
+  right:20px;
+  font-size:40px;
+  animation:fly 4s infinite;
 }
 
-@keyframes float {
-  50% { transform:translateY(-10px); }
+.wand {
+  font-size:20px;
+  display:block;
+  text-align:center;
+}
+
+@keyframes fly {
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-20px)}
+  100%{transform:translateY(0)}
+}
+
+.blink {
+  animation:blink 0.5s;
+}
+
+@keyframes blink {
+  0%{opacity:1}
+  50%{opacity:0}
+  100%{opacity:1}
 }
 </style></head><body><nav>
-  <h2>🌿 Eco-Dine</h2>
+  <div class="logo">🌿 Eco-Dine <span class="sh">SH</span></div>
   <div onclick="toggleCart()">🛒 Cart (<span id="count">0</span>)</div>
 </nav><div class="menu" id="menu"></div><div class="cart" id="cart">
   <h3>Your Cart</h3>
   <div id="cartItems"></div>
   <h4>Total: ₹<span id="total">0</span></h4>
-</div><div class="penguin" id="penguin">🐧</div><script>
+</div><!-- 🧚 Fairy --><div class="fairy" id="fairy">
+  🧚‍♀️
+  <span class="wand" id="wand">✨</span>
+</div><script>
 
 const menuItems = [
 {name:"Pizza",price:250,img:"https://images.unsplash.com/photo-1601924582975-7e8b1b2b4f3c?auto=format&fit=crop&w=400"},
@@ -105,7 +128,16 @@ const menuItems = [
 {name:"Sandwich",price:120,img:"https://images.unsplash.com/photo-1553909489-cd47e0ef937f?auto=format&fit=crop&w=400"},
 {name:"Momos",price:110,img:"https://images.unsplash.com/photo-1625944525903-b0a9d0d9c9d6?auto=format&fit=crop&w=400"},
 {name:"Fried Rice",price:150,img:"https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=400"},
-{name:"Donut",price:80,img:"https://images.unsplash.com/photo-1505253213348-cd54c840f1f0?auto=format&fit=crop&w=400"}
+{name:"Donut",price:80,img:"https://images.unsplash.com/photo-1505253213348-cd54c840f1f0?auto=format&fit=crop&w=400"},
+{name:"Pasta",price:200,img:"https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&w=400"},
+{name:"Ice Cream",price:90,img:"https://images.unsplash.com/photo-1497032205916-ac775f0649ae?auto=format&fit=crop&w=400"},
+{name:"Milkshake",price:130,img:"https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=400"},
+{name:"Paneer Tikka",price:220,img:"https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=400"},
+{name:"French Fries",price:100,img:"https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=400"},
+{name:"Noodles",price:160,img:"https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=400"},
+{name:"Coffee",price:60,img:"https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400"},
+{name:"Broccoli Salad",price:140,img:"https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=400"},
+{name:"Chocolate Lava Cake",price:120,img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=400"}
 ];
 
 let cart = {};
@@ -129,7 +161,7 @@ function render(){
 function add(i){
  cart[i]=(cart[i]||0)+1;
  updateCart();
- penguinReact();
+ blinkWand();
 }
 
 function updateCart(){
@@ -148,10 +180,10 @@ function toggleCart(){
  document.getElementById("cart").classList.toggle("open");
 }
 
-function penguinReact(){
- let p=document.getElementById("penguin");
- p.innerHTML="😄🐧";
- setTimeout(()=>p.innerHTML="🐧",1000);
+function blinkWand(){
+ let wand=document.getElementById("wand");
+ wand.classList.add("blink");
+ setTimeout(()=>wand.classList.remove("blink"),500);
 }
 
 render();

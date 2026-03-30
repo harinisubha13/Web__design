@@ -1,0 +1,185 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco-Dine Smart Menu</title><style>
+body { font-family: Arial; margin:0; background:#f5f5f5; }
+
+nav {
+  background:#2e7d32;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.hero { text-align:center; padding:20px; }
+
+.menu {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  padding:20px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  border-radius:10px;
+  text-align:center;
+  cursor:pointer;
+  transition:0.2s;
+}
+.card:hover { transform:scale(1.05); }
+
+.price { color:green; font-weight:bold; }
+
+button {
+  padding:8px;
+  margin-top:10px;
+  border:none;
+  background:green;
+  color:white;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+/* CART */
+.cart {
+  position:fixed;
+  right:-300px;
+  top:0;
+  width:300px;
+  height:100%;
+  background:white;
+  padding:15px;
+  transition:0.3s;
+}
+.cart.open { right:0; }
+
+/* POPUP */
+.popup {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.popup-content {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  text-align:center;
+  width:300px;
+}
+
+.popup img {
+  width:100%;
+  border-radius:10px;
+}
+
+.close {
+  float:right;
+  cursor:pointer;
+  font-size:20px;
+}
+
+</style></head><body><nav>
+  <h2>🌿 Eco-Dine</h2>
+  <button onclick="toggleCart()">Cart (<span id="count">0</span>)</button>
+</nav><div class="hero">
+  <h1>🍽 Smart Eco Menu</h1>
+</div><div class="menu" id="menu"></div><div class="cart" id="cart">
+  <h2>Your Cart</h2>
+  <div id="cartItems"></div>
+  <h3>Total: ₹<span id="total">0</span></h3>
+  <button onclick="placeOrder()">Place Order</button>
+</div><!-- POPUP --><div class="popup" id="popup">
+  <div class="popup-content">
+    <span class="close" onclick="closePopup()">✖</span>
+    <img id="popupImg">
+    <h3 id="popupName"></h3>
+    <p id="popupPrice"></p>
+    <button onclick="addFromPopup()">Add to Cart</button>
+  </div>
+</div><script>
+
+const MENU = [
+ {id:1,name:"French Fries",price:100,img:"https://images.unsplash.com/photo-1541592106381-b31e9677c0e5"},
+ {id:2,name:"Broccoli Salad",price:140,img:"https://images.unsplash.com/photo-1550304943-4f24f54ddde9"},
+ {id:3,name:"Coffee",price:60,img:"https://images.unsplash.com/photo-1509042239860-f550ce710b93"},
+ {id:4,name:"Chocolate Lava Cake",price:120,img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c"},
+ {id:5,name:"Noodles",price:160,img:"https://images.unsplash.com/photo-1585032226651-759b368d7246"}
+];
+
+let cart = {};
+let selectedItem = null;
+
+function renderMenu(){
+ document.getElementById("menu").innerHTML =
+ MENU.map(item=>`
+  <div class="card" onclick="openPopup(${item.id})">
+   <h3>${item.name}</h3>
+   <p class="price">₹${item.price}</p>
+  </div>
+ `).join('');
+}
+
+function openPopup(id){
+ let item = MENU.find(i=>i.id==id);
+ selectedItem = item;
+ document.getElementById("popupImg").src = item.img;
+ document.getElementById("popupName").innerText = item.name;
+ document.getElementById("popupPrice").innerText = "₹" + item.price;
+ document.getElementById("popup").style.display="flex";
+}
+
+function closePopup(){
+ document.getElementById("popup").style.display="none";
+}
+
+function addFromPopup(){
+ add(selectedItem.id);
+ closePopup();
+}
+
+function add(id){
+ cart[id]=(cart[id]||0)+1;
+ updateCart();
+}
+
+function updateCart(){
+ let total=0;
+ let html="";
+
+ for(let id in cart){
+  let item=MENU.find(i=>i.id==id);
+  let qty=cart[id];
+  total+=item.price*qty;
+  html+=`<p>${item.name} x${qty}</p>`;
+ }
+
+ document.getElementById("cartItems").innerHTML=html;
+ document.getElementById("total").innerText=total;
+ document.getElementById("count").innerText=
+  Object.values(cart).reduce((a,b)=>a+b,0);
+}
+
+function toggleCart(){
+ document.getElementById("cart").classList.toggle("open");
+}
+
+function placeOrder(){
+ alert("🎉 Order placed!");
+ cart={};
+ updateCart();
+ toggleCart();
+}
+
+renderMenu();
+
+</script></body>
+</html>
